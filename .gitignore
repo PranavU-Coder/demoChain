@@ -1,2 +1,11 @@
+# no longer using env key as such cause I'm broke af to afford OpenAI's billing service
+
 .env
+
+# virtual environment
+
 /langchainer
+
+# retarded python cache
+
+/__pycache__
