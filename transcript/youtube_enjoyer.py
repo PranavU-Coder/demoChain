@@ -1,0 +1,54 @@
+from langchain_ollama import ChatOllama
+from langchain.prompts import PromptTemplate
+from langchain_core.output_parsers import StrOutputParser
+
+from langchain.document_loaders import YoutubeLoader
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain.embeddings import OllamaEmbeddings
+from langchain.vectorstores import FAISS 
+
+embeddings = OllamaEmbeddings(model="nomic-embed-text")
+
+video_url = "https://www.youtube.com/watch?v=hUMTSmYorCM"
+
+def create_vector_deb_youtube_url(video_url : str) -> FAISS :
+
+    loader = YoutubeLoader.from_youtube_url(video_url)
+    transcript = loader.load()
+
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
+    docs = text_splitter.split_documents(transcript)
+
+    db = FAISS.from_documents(documents=docs, embedding=embeddings)
+    return db
+
+def get_response_query(db, query, k=8):
+
+    # can handle 8192 tokens
+
+    docs = db.similarity_search(query, k=k)
+    docs_page_content = " ".join([d.page_content for d in docs])
+
+    llm = embeddings
+
+    prompt = PromptTemplate(
+        input_variables=["questions", docs],
+        template="""
+        You are a helpful assistant that that can answer questions about youtube videos 
+        based on the video's transcript.
+        
+        Answer the following question: {question}
+        By searching the following video transcript: {docs}
+        
+        Only use the factual information from the transcript to answer the question.
+        
+        If you feel like you don't have enough information to answer the question, say "I don't know".
+        
+        Your answers should be verbose and detailed.
+        """,
+    )
+
+    chain = prompt | llm | StrOutputParser()
+    
+    response = chain.run(question=query, docs=docs_page_content)
+    return response
