@@ -29,10 +29,10 @@ def get_response_query(db, query, k=8):
     docs = db.similarity_search(query, k=k)
     docs_page_content = " ".join([d.page_content for d in docs])
 
-    llm = embeddings
+    llm = ChatOllama(model="llama3.2")
 
     prompt = PromptTemplate(
-        input_variables=["questions", docs],
+        input_variables=["questions", "docs"],
         template="""
         You are a helpful assistant that that can answer questions about youtube videos 
         based on the video's transcript.
@@ -50,5 +50,5 @@ def get_response_query(db, query, k=8):
 
     chain = prompt | llm | StrOutputParser()
     
-    response = chain.run(question=query, docs=docs_page_content)
+    response = chain.invoke({"question": query, "docs": docs_page_content})
     return response
