@@ -10,3 +10,7 @@
 
 /__pycache__
 /transcript/__pycache__
+
+# databases initialized due chroma
+/lang_graph/ai_agents/56c966e4-dca0-446f-ae61-0c240a0903c7
+/lang_graph/ai_agents/chroma.sqlite3
