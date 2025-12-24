@@ -1,0 +1,1 @@
+Python 3.13 features include: - f-strings for more readable string formatting - type hinting to specify function return types and parameter types - structural pattern matching - improved error handling and debugging tools
